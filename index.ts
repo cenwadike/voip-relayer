@@ -24,7 +24,6 @@ const solProvider = new AnchorProvider(solConnection, solWallet, {
 });
 
 const decimals: number =  10 ** 9;
-
 const relayerConfig = {
   solWallet: adminSolWallet, 
   ethWallet: adminEthWallet,
@@ -83,7 +82,6 @@ const ethBridge = new ethers.Contract(
   bridgeAbi,
   ethAccount
 );
-
 
 ethBridge.on("TokensLocked", async (amount, user, solanaAddress, _timestamp, _event) => {
   logger.info(
@@ -223,7 +221,7 @@ ethBridge.on("TokensLocked", async (amount, user, solanaAddress, _timestamp, _ev
                 Amount:      ${amount}
         `
       )
-      await burnEthToken(user);
+      await burnEthToken(user, solanaAddress);
     } catch (error) {
       logger.error(
         `
@@ -378,10 +376,10 @@ const migrateToken = async(amount: number, destination: PublicKey) => {
 }
 
 
-const burnEthToken = async(ethAddress: string) => {
+const burnEthToken = async(ethAddress: string, solAddress: string) => {
   let burnTxHash;
   try {
-    let tx = await ethBridge.burnTokens(ethAddress) 
+    let tx = await ethBridge.burnTokens(ethAddress, solAddress) 
     tx.wait();
     burnTxHash = tx.hash;
 
